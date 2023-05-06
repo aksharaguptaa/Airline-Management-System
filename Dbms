@@ -1,0 +1,249 @@
+CREATE DATABASE PR65;
+use PR65;
+
+create table AirCrafts(
+AcID int primary key,
+AcNumber varchar(32) NOT NULL,
+Capacity int NOT NULL,
+MfdBy varchar(128) NOT NULL,
+MfdOn Date NOT NULL
+);
+
+CREATE TABLE Route(
+RtID int,
+Airport varchar(32) NOT NULL,
+Destination varchar(32) NOT NULL,
+RouteCode Varchar(16) NOT NULL UNIQUE,
+PRIMARY KEY(RtID)
+);
+
+CREATE TABLE AirFare(
+AfID int,
+RtID int,
+Fare int,
+FSC int,
+PRIMARY KEY(AfID),
+CONSTRAINT 1k_Route FOREIGN KEY(RtID) REFERENCES Route(RtID));
+
+
+CREATE TABLE Flight_Schedule(
+FlID int,
+FlightDate DATE,
+Departure TIME,
+Arrival TIME,
+AcID int,
+AfID int,
+PRIMARY KEY(FlID),
+CONSTRAINT 1k_AirCraft FOREIGN KEY (AcID) REFERENCES Aircrafts(AcID),
+CONSTRAINT 1k_NetFare FOREIGN KEY (AfID) REFERENCES AirFare(AfID)
+);
+
+CREATE TABLE Discounts(
+DiID int PRIMARY KEY,
+Title varchar(32),
+Amount decimal(9,2),
+Description varchar(225)
+);
+
+CREATE TABLE Charges(
+ChID int PRIMARY KEY,
+Title varchar(30),
+Amount decimal(9,2),
+Description varchar(225)
+);
+
+CREATE TABLE Countries(
+CtID INT PRIMARY KEY,
+CountryName char(20) NOT NULL
+);
+
+CREATE TABLE State(
+StID INT,
+StateName Varchar(32), 
+CtID INT,
+PRIMARY KEY (StID),
+CONSTRAINT Ik_Country FOREIGN KEY (CtID) REFERENCES Countries(CtID)
+);
+
+CREATE TABLE Contact_Details(
+CnID INT PRIMARY KEY,
+Email Varchar(55) NOT NULL,
+PhNo Varchar(16) NOT NULL,
+Street Varchar(64),
+StID INT NOT NULL,
+CONSTRAINT 1k_State FOREIGN KEY (StID) REFERENCES State(StID)
+);
+
+CREATE TABLE Passengers(
+PsID INT PRIMARY KEY,
+Name Varchar(32) NOT NULL,
+Address Varchar(64) NOT NULL,
+Age INT NOT NULL,
+Nationality Varchar(16) NOT NULL,
+CnID INT NOT NULL,
+CONSTRAINT tk_Contacts FOREIGN KEY (CnID) REFERENCES Contact_Details(CnID)
+);
+
+ 
+CREATE TABLE Branches(
+BrID INT PRIMARY KEY,
+Center Varchar(16) NOT NULL,
+Address Varchar(32) NOT NULL,
+StID INT,
+CONSTRAINT Ik_StateOlEmployee FOREIGN KEY (StID) REFERENCES State(StID)
+);
+
+
+CREATE TABLE Employee(
+EmpID INT PRIMARY KEY,
+Name Varchar(32) NOT NULL,
+Address Varchar(32) NOT NULL,
+BrID INT NOT NULL,
+Designation Varchar(32) NOT NULL,
+Email Varchar(55) NOT NULL,
+PhNo Varchar(16) NOT NULL,
+CONSTRAINT 1k_Branch FOREIGN KEY (BrID) REFERENCES Branches(BrID)
+);
+
+
+CREATE TABLE Transactions(
+TsID INT PRIMARY KEY,
+BookingDate_Time DATETIME not null default(current_timestamp),
+DepartureDate_Time DATETIME,
+PsID INT,
+FlID INT,
+EmpID INT,
+ChID INT,
+DiID INT,
+CONSTRAINT 1k_Passenger FOREIGN KEY (PsID) REFERENCES Passengers(PsID),
+CONSTRAINT 1k_F1ight FOREIGN KEY (FlID) REFERENCES Flight_Schedule(FlID),
+CONSTRAINT 1k_Employee FOREIGN KEY (EmpID) REFERENCES Employee(EmpID),
+CONSTRAINT 1k_Charges FOREIGN KEY (ChID) REFERENCES Charges(ChID),
+CONSTRAINT Ik_Discount FOREIGN KEY (DiID) REFERENCES Discounts(DiID)
+);
+
+
+INSERT INTO Aircrafts VALUES(101, "AG-101", 3000, "AIRBUS", "2003-04-10");
+INSERT INTO Aircrafts VALUES(102, "AG-102", 2000, "ROLLS ROYEE", "2003-05-25");
+INSERT INTO Aircrafts VALUES(103, "AG-103", 4000, "HAVEUS", "2006-08-28");
+INSERT INTO Aircrafts VALUES(104, "AG-104", 6000, "BOEING", "2002-07-30");
+INSERT INTO Aircrafts VALUES(105, "AG-105", 4500, "BEECHCRAFT", "2015-06-18");
+
+
+INSERT INTO Route Values(701,"DELHI","BENGALURU","DEL-BEN");
+INSERT INTO Route Values(708,"CHICAGO","ROME","CHI-ROM");
+INSERT INTO Route Values(712,"ATLANTA","FRANKFURT","ATL-FRA");
+INSERT INTO Route Values(718,"NEW YORK","LONDON","NEW-LON");
+INSERT INTO Route Values(750,"SYDNEY","MELBOURNE","SYD-MEL");
+
+
+
+INSERT INTO AirFare VALUES(82195, 701, 150, 700);
+INSERT INTO AirFare VALUES(70171, 708, 230, 760);
+INSERT INTO AirFare VALUES(16412, 712, 320, 880);
+INSERT INTO AirFare VALUES(75632, 718, 440, 920);
+INSERT INTO AirFare VALUES(85806, 750, 600, 1200);
+
+
+INSERT INTO Flight_Schedule VALUES(55838, '2022-12-20', '11:15:00', '18:00:00', 101, 82195);
+INSERT INTO Flight_Schedule VALUES(52576, '2022-12-20', '09:00:00', '15:00:00', 102, 70171);
+INSERT INTO Flight_Schedule VALUES(56097, '2022-12-22', '13:00:00', '20:00:00', 103, 16412);
+INSERT INTO Flight_Schedule VALUES(58762, '2022-12-24', '06:00:00', '16:00:00', 104, 75632);
+INSERT INTO Flight_Schedule VALUES(69758, '2022-12-25', '12:00:00', '23:00:00', 105, 85806);
+
+INSERT INTO Discounts VALUES(340,'Children', 5, 'Rupees 5 Discount is provide to all children under age of 10.');
+INSERT INTO Discounts VALUES(365,'Womens', 3, 'Rupees 3 Discount is provide to all the womens');
+INSERT INTO Discounts VALUES(366,'Offer', 2, 'Rupees 2 Special offer discount to all.');
+
+INSERT INTO Charges VALUES(344,'Urgent Cancellation', 10,'Rupees 10 will be charged for cancellation for booking within 11 hrs from flight time');
+
+
+INSERT INTO Countries VALUES(211340, 'INDIA');
+INSERT INTO Countries VALUES(211439, 'UNITED STATES');
+INSERT INTO Countries VALUES(211400, 'AUSTRALIA');
+
+
+INSERT INTO State VALUES(111, 'DELHI', 211340);
+INSERT INTO State VALUES(222, 'ALASKA', 211439);
+INSERT INTO State VALUES(333, 'VICTORIA', 211400);
+
+INSERT INTO Contact_Details VALUES(1947,'hello@gmail.com','8219516419','RAJOURI GARDEN', 111);
+INSERT INTO Contact_Details VALUES(1950,'welcome@gmail.com','8580641909','SESAME STREET', 222);
+INSERT INTO Contact_Details VALUES(1975,'namaste@gmail.com','7017175639','VICTORIA STREET', 333);
+
+INSERT INTO Passengers VALUES(20001,'SHIVAM THAKUR', 'SUNDERNAGAR-21', 19, 'INDIAN', 1947);
+INSERT INTO Passengers VALUES(20002,'SHAURYA KASHYAP', 'NORTH KIERLAND', 27, 'AMERICAN', 1950);
+INSERT INTO Passengers VALUES(20003,'AKSHARA THAKUR', 'NEW WHYALLA', 22, 'AUSTRALIAN', 1975);
+
+INSERT INTO Branches VALUES(133104, 'ROYAL AIR FORCE', 'NEW ROAD KATHMANDU', 111);
+INSERT INTO Branches VALUES(136201, 'AVIATION TRENDS', 'KINGSTON NEW YORK', 222);
+INSERT INTO Branches VALUES(130431, 'AIRBUS CANADA', 'NEW ATLANTIS', 333);
+
+
+INSERT INTO Employee VALUES(251122,'AAYUSH', 'MP INDIA', 133104, 'PILOT','roman@gmail.com', '9816079682');
+INSERT INTO Employee VALUES(262233, 'KARAN','LOS ANGELES ', 136201, 'PILOT','seth@gmail.com', '9816881523');
+INSERT INTO Employee VALUES(273344,'DHRUV', 'CASTLEREAGH STREET', 130431, 'SECURITY','brock@gmail.com', '8217916034');
+
+
+INSERT INTO Transactions(TsID,DepartureDate_Time,PsID,FlID,EmpID,ChID,DiID)
+VALUES( 54322 ,'2022-12-20 11:15:00', 20001, 55838, 251122, NULL,NULL );
+INSERT INTO Transactions(TsID,DepartureDate_Time,PsID,FlID,EmpID,ChID,DiID)
+VALUES( 54328 ,'2022-12-20 09:00:00', 20002, 52576, 262233, 344, NULL);
+INSERT INTO Transactions(TsID,DepartureDate_Time,PsID,FlID,EmpID,ChID,DiID)
+VALUES( 54330 ,'2022-12-22 13:00:00', 20003, 56097, 273344, NULL, 365);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+queries----
+1.Find aircraft number, pickup and destination place and route code for which flight
+is scheduled after 2022-12-22.
+
+select AcNumber,Airport,Destination,RouteCode
+from Aircrafts a,Route r,Airfare aa, Flight_Schedule f
+where(FlightDate > "2022-12-22") and
+a.AcID=f.AcID and r.RtID=aa.RtID and aa.AfID=f.AfID;
+
+
+2.Find the name, age, email, phno of PASSENGERS those who are from INDIA or AUSTRALIA.
+
+select Name,Age,Email,PhNo
+from Passengers p,Contact_Details c,State s,Countries o
+where (o.CountryName="INDIA" or o.CountryName="AUSTRALIA") and
+c.StID=s.StID and p.CnID=c.CnID and s.CtID=o.CtID;
+
+
+3.Find the name, phno, email and designation of employees whose center is ROYAL AIR FORCE.
+ 
+select Name,PhNo,Email,Designation
+from Employee e,Branches b
+where e.BrID=b.BrID AND           
+(b.Center="ROYAL AIR FORCE"); 
+
+4.Use cross join on tables - AirCrafts and Flight_Schedule
+
+select AirCrafts.AcID,AirCrafts.AcNumber,AirCrafts.Capacity,Flight_Schedule.FlightDate,
+Flight_Schedule.Departure,Flight_Schedule.Arrival
+from AirCrafts
+cross join Flight_Schedule
+where AirCrafts.AcID=Flight_Schedule.AcID;
+
+5.Find the Aircraft numbers and Capacity as NO_OF_PASSENGERS to travel having more than 3000 seats.
+
+select AcNumber,Capacity as NO_OF_PASSENGERS
+FROM AirCrafts
+group by AcID
+having Capacity > 3000;
